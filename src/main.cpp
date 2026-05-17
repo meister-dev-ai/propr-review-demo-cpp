@@ -323,6 +323,18 @@ std::string formatDate(const std::string &date) {
   return formatted.str();
 }
 
+std::string formatDateOrFallback(const std::string &date, const std::string &fallback) {
+  try {
+    return formatDate(date);
+  } catch (const std::exception &error) {
+    if (!fallback.empty()) {
+      return fallback;
+    }
+  }
+
+  throw;
+}
+
 std::string pageTitle(const std::string &title) {
   return title + " | Propr Review Demo";
 }
@@ -405,7 +417,7 @@ std::string renderSectionContent(const Section &section) {
 
   for (const Document &article : section.articles) {
     html << "    <article class=\"article-card\">\n"
-         << "      <div class=\"article-card-meta\"><span>" << escapeHtml(formatDate(article.date))
+         << "      <div class=\"article-card-meta\"><span>" << escapeHtml(formatDateOrFallback(article.date, article.title))
          << "</span></div>\n"
          << "      <h2><a href=\"" << article.route << "\">" << escapeHtml(article.title)
          << "</a></h2>\n";
