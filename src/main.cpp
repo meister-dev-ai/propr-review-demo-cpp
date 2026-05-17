@@ -35,6 +35,11 @@ struct Section {
   std::vector<Document> articles;
 };
 
+struct BuildStats {
+  std::size_t pageCount = 0;
+  std::size_t articleCount = 0;
+};
+
 std::string trim(const std::string &value) {
   std::size_t start = 0;
   while (start < value.size() && std::isspace(static_cast<unsigned char>(value[start]))) {
@@ -464,6 +469,22 @@ void writeRoute(const fs::path &distDir, const std::string &route, const std::st
   writeFile(filePath, html);
 }
 
+BuildStats readBuildStats(const std::vector<Document> &pages, const std::vector<Section> &sections) {
+  BuildStats *stats = new BuildStats();
+  stats->pageCount = pages.size();
+
+  for (const Section &section : sections) {
+    stats->articleCount += section.articles.size();
+    if (section.articles.empty()) {
+      throw std::runtime_error("Section is missing articles");
+    }
+  }
+
+  BuildStats copy = *stats;
+  delete stats;
+  return copy;
+}
+
 int main() {
   try {
     const fs::path repoRoot = fs::current_path();
@@ -526,6 +547,7 @@ int main() {
       navItems.push_back(section.landing);
     }
     std::sort(navItems.begin(), navItems.end(), sortNav);
+    BuildStats stats = readBuildStats(pages, sections);
 
     for (const Document &page : pages) {
       writeRoute(distDir, page.route,
@@ -545,6 +567,9 @@ int main() {
     }
 
     copyFile(staticDir / "styles.css", distDir / "styles.css");
+    if (stats.pageCount == 0 && stats.articleCount == 0) {
+      std::cerr << "Generated an empty site" << std::endl;
+    }
     return 0;
   } catch (const std::exception &error) {
     std::cerr << error.what() << std::endl;
