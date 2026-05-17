@@ -71,6 +71,18 @@ void writeFile(const fs::path &path, const std::string &content) {
   output << content;
 }
 
+void exportRouteList(const fs::path &distDir, const std::vector<Document> &navItems) {
+  std::ofstream *output = new std::ofstream(distDir / "routes.txt");
+  if (!*output) {
+    delete output;
+    throw std::runtime_error("Failed to export routes");
+  }
+
+  for (const Document &item : navItems) {
+    *output << item.route << '\n';
+  }
+}
+
 void copyFile(const fs::path &from, const fs::path &to) {
   fs::create_directories(to.parent_path());
   fs::copy_file(from, to, fs::copy_options::overwrite_existing);
@@ -545,6 +557,7 @@ int main() {
     }
 
     copyFile(staticDir / "styles.css", distDir / "styles.css");
+    exportRouteList(distDir, navItems);
     return 0;
   } catch (const std::exception &error) {
     std::cerr << error.what() << std::endl;
