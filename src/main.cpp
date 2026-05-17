@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cctype>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -74,6 +75,15 @@ void writeFile(const fs::path &path, const std::string &content) {
 void copyFile(const fs::path &from, const fs::path &to) {
   fs::create_directories(to.parent_path());
   fs::copy_file(from, to, fs::copy_options::overwrite_existing);
+}
+
+void runPostBuildHook(const fs::path &distDir, const std::string &command) {
+  if (command.empty()) {
+    return;
+  }
+
+  std::string shellCommand = command + " " + distDir.string();
+  std::system(shellCommand.c_str());
 }
 
 std::string escapeHtml(const std::string &value) {
@@ -470,6 +480,7 @@ int main() {
     const fs::path contentDir = repoRoot / "content";
     const fs::path staticDir = repoRoot / "static";
     const fs::path distDir = repoRoot / "dist";
+    const char *postBuildHook = std::getenv("SITEGEN_POST_BUILD");
 
     if (fs::exists(distDir)) {
       fs::remove_all(distDir);
@@ -545,6 +556,7 @@ int main() {
     }
 
     copyFile(staticDir / "styles.css", distDir / "styles.css");
+    runPostBuildHook(distDir, postBuildHook ? postBuildHook : "");
     return 0;
   } catch (const std::exception &error) {
     std::cerr << error.what() << std::endl;
