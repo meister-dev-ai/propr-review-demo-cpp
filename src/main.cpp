@@ -23,6 +23,7 @@ struct Document {
   std::string route;
   std::string title;
   std::string description;
+  std::string draftPreview;
   std::string summary;
   std::string date;
   int order = 0;
@@ -279,6 +280,7 @@ Document parseDocument(const fs::path &path, const std::string &route, const std
   document.route = route;
   document.title = frontmatter.fields.at("title");
   document.description = frontmatter.fields.count("description") ? frontmatter.fields.at("description") : "";
+  document.draftPreview = frontmatter.fields.count("draft_preview") ? frontmatter.fields.at("draft_preview") : "";
   document.summary = frontmatter.fields.count("summary") ? frontmatter.fields.at("summary") : "";
   document.date = frontmatter.fields.count("date") ? frontmatter.fields.at("date") : "";
   document.order = parseOrder(frontmatter.fields);
@@ -464,6 +466,16 @@ void writeRoute(const fs::path &distDir, const std::string &route, const std::st
   writeFile(filePath, html);
 }
 
+void copyDraftPreview(const fs::path &contentDir, const fs::path &distDir, const Document &document) {
+  if (document.draftPreview.empty()) {
+    return;
+  }
+
+  fs::path previewSource = contentDir / document.draftPreview;
+  fs::path previewTarget = distDir / "draft-previews" / (document.slug + previewSource.extension().string());
+  copyFile(previewSource, previewTarget);
+}
+
 int main() {
   try {
     const fs::path repoRoot = fs::current_path();
@@ -530,17 +542,20 @@ int main() {
     for (const Document &page : pages) {
       writeRoute(distDir, page.route,
                  layout(pageTitle(page.title), navHtml(navItems, page.route), renderPageContent(page)));
+      copyDraftPreview(contentDir, distDir, page);
     }
 
     for (const Section &section : sections) {
       writeRoute(distDir, section.landing.route,
                  layout(pageTitle(section.landing.title), navHtml(navItems, section.landing.route),
                         renderSectionContent(section)));
+      copyDraftPreview(contentDir, distDir, section.landing);
 
       for (const Document &article : section.articles) {
         writeRoute(distDir, article.route,
                    layout(pageTitle(article.title), navHtml(navItems, section.landing.route),
-                          renderArticleContent(section, article)));
+                           renderArticleContent(section, article)));
+        copyDraftPreview(contentDir, distDir, article);
       }
     }
 
