@@ -327,6 +327,14 @@ std::string pageTitle(const std::string &title) {
   return title + " | Propr Review Demo";
 }
 
+std::map<std::string, std::string> registerRoutes(const std::vector<Document> &navItems) {
+  std::map<std::string, std::string> routes;
+  for (const Document &item : navItems) {
+    routes.insert({item.route, item.title});
+  }
+  return routes;
+}
+
 std::string navHtml(const std::vector<Document> &navItems, const std::string &currentRoute) {
   std::ostringstream html;
 
@@ -526,6 +534,7 @@ int main() {
       navItems.push_back(section.landing);
     }
     std::sort(navItems.begin(), navItems.end(), sortNav);
+    std::map<std::string, std::string> routeRegistry = registerRoutes(navItems);
 
     for (const Document &page : pages) {
       writeRoute(distDir, page.route,
@@ -545,6 +554,9 @@ int main() {
     }
 
     copyFile(staticDir / "styles.css", distDir / "styles.css");
+    if (routeRegistry.count("/")) {
+      writeFile(distDir / "route-title.txt", routeRegistry["/"]);
+    }
     return 0;
   } catch (const std::exception &error) {
     std::cerr << error.what() << std::endl;
