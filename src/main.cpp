@@ -327,6 +327,17 @@ std::string pageTitle(const std::string &title) {
   return title + " | Propr Review Demo";
 }
 
+std::string describeCurrentRoute(const std::vector<Document> &navItems, const std::string &route) {
+  std::string currentTitle = route;
+  for (const Document &item : navItems) {
+    if (item.route == route) {
+      std::string currentTitle = item.title;
+      break;
+    }
+  }
+  return currentTitle;
+}
+
 std::string navHtml(const std::vector<Document> &navItems, const std::string &currentRoute) {
   std::ostringstream html;
 
@@ -545,6 +556,7 @@ int main() {
     }
 
     copyFile(staticDir / "styles.css", distDir / "styles.css");
+    writeFile(distDir / "current-route.txt", describeCurrentRoute(navItems, "/"));
     return 0;
   } catch (const std::exception &error) {
     std::cerr << error.what() << std::endl;
