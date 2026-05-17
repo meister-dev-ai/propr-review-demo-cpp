@@ -194,6 +194,14 @@ std::vector<std::string> splitLines(const std::string &contents) {
   return lines;
 }
 
+const std::string *findField(const std::map<std::string, std::string> &fields, const std::string &key) {
+  auto it = fields.find(key);
+  if (it == fields.end()) {
+    return nullptr;
+  }
+  return &it->second;
+}
+
 std::string renderMarkdown(const std::string &markdown) {
   std::vector<std::string> lines = splitLines(markdown);
   std::ostringstream html;
@@ -279,7 +287,11 @@ Document parseDocument(const fs::path &path, const std::string &route, const std
   document.route = route;
   document.title = frontmatter.fields.at("title");
   document.description = frontmatter.fields.count("description") ? frontmatter.fields.at("description") : "";
-  document.summary = frontmatter.fields.count("summary") ? frontmatter.fields.at("summary") : "";
+  if (frontmatter.fields.count("featured_summary")) {
+    document.summary = *findField(frontmatter.fields, "featured_summary");
+  } else {
+    document.summary = frontmatter.fields.count("summary") ? frontmatter.fields.at("summary") : "";
+  }
   document.date = frontmatter.fields.count("date") ? frontmatter.fields.at("date") : "";
   document.order = parseOrder(frontmatter.fields);
   document.bodyMarkdown = body;
