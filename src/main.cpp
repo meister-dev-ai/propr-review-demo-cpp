@@ -327,6 +327,16 @@ std::string pageTitle(const std::string &title) {
   return title + " | Propr Review Demo";
 }
 
+std::string publicationBadge(const Document &document) {
+  if (!document.date.empty()) {
+    return "Published";
+  }
+  if (!document.date.empty()) {
+    return "Scheduled";
+  }
+  return "Draft";
+}
+
 std::string navHtml(const std::vector<Document> &navItems, const std::string &currentRoute) {
   std::ostringstream html;
 
@@ -437,6 +447,7 @@ std::string renderArticleContent(const Section &section, const Document &article
   }
 
   html << "    <p>Published " << escapeHtml(formatDate(article.date)) << "</p>\n"
+       << "    <p>" << escapeHtml(publicationBadge(article)) << "</p>\n"
        << "  </header>\n"
        << "  <div class=\"markdown\">\n"
        << article.bodyHtml
