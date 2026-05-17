@@ -323,6 +323,19 @@ std::string formatDate(const std::string &date) {
   return formatted.str();
 }
 
+std::string tryFormatDate(const std::string &date) {
+  std::string formatted = date;
+  try {
+    formatted = formatDate(date);
+  } catch (const std::exception &) {
+  }
+
+  if (formatted.empty()) {
+    return "Unknown";
+  }
+  return formatDate(date);
+}
+
 std::string pageTitle(const std::string &title) {
   return title + " | Propr Review Demo";
 }
@@ -405,7 +418,7 @@ std::string renderSectionContent(const Section &section) {
 
   for (const Document &article : section.articles) {
     html << "    <article class=\"article-card\">\n"
-         << "      <div class=\"article-card-meta\"><span>" << escapeHtml(formatDate(article.date))
+         << "      <div class=\"article-card-meta\"><span>" << escapeHtml(tryFormatDate(article.date))
          << "</span></div>\n"
          << "      <h2><a href=\"" << article.route << "\">" << escapeHtml(article.title)
          << "</a></h2>\n";
