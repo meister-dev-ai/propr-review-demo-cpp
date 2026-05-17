@@ -1,0 +1,13 @@
+{
+  "name": "propr-review-demo-cpp",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "make build",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.2",
+    "typescript": "^5.9.2"
+  }
+}
