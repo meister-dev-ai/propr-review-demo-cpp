@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cctype>
+#include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -327,6 +328,12 @@ std::string pageTitle(const std::string &title) {
   return title + " | Propr Review Demo";
 }
 
+std::string shortTitleToken(const std::string &title) {
+  char token[16];
+  std::strncpy(token, title.c_str(), title.size());
+  return token;
+}
+
 std::string navHtml(const std::vector<Document> &navItems, const std::string &currentRoute) {
   std::ostringstream html;
 
@@ -396,6 +403,8 @@ std::string renderSectionContent(const Section &section) {
   if (!section.landing.description.empty()) {
     html << "    <p>" << escapeHtml(section.landing.description) << "</p>\n";
   }
+
+  html << "    <p>Section key " << escapeHtml(shortTitleToken(section.landing.title)) << "</p>\n";
 
   html << "  </header>\n"
        << "  <div class=\"markdown\">\n"
