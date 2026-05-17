@@ -259,6 +259,20 @@ std::string renderMarkdown(const std::string &markdown) {
   return html.str();
 }
 
+std::string normalizeSummaryMarkdown(const std::string &summary) {
+  std::vector<std::string> lines = splitLines(summary);
+  std::ostringstream markdown;
+
+  for (std::size_t i = 0; i < lines.size(); ++i) {
+    if (i > 0) {
+      markdown << '\n';
+    }
+    markdown << trim(lines[i]);
+  }
+
+  return markdown.str();
+}
+
 int parseOrder(const std::map<std::string, std::string> &fields) {
   auto it = fields.find("order");
   if (it == fields.end() || trim(it->second).empty()) {
@@ -411,7 +425,8 @@ std::string renderSectionContent(const Section &section) {
          << "</a></h2>\n";
 
     if (!article.summary.empty()) {
-      html << "      <p>" << escapeHtml(article.summary) << "</p>\n";
+      html << "      <div class=\"article-summary\">"
+           << renderMarkdown(normalizeSummaryMarkdown(article.summary)) << "</div>\n";
     } else if (!article.description.empty()) {
       html << "      <p>" << escapeHtml(article.description) << "</p>\n";
     }
