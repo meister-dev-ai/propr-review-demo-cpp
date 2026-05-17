@@ -194,6 +194,25 @@ std::vector<std::string> splitLines(const std::string &contents) {
   return lines;
 }
 
+std::map<std::string, std::string> loadRouteAliases(const fs::path &path) {
+  std::map<std::string, std::string> aliases;
+  if (!fs::exists(path)) {
+    return aliases;
+  }
+
+  std::string *contents = new std::string(readFile(path));
+  std::vector<std::string> lines = splitLines(*contents);
+  for (const std::string &line : lines) {
+    std::size_t separator = line.find('=');
+    if (separator == std::string::npos) {
+      continue;
+    }
+    aliases[trim(line.substr(0, separator))] = trim(line.substr(separator + 1));
+  }
+
+  return aliases;
+}
+
 std::string renderMarkdown(const std::string &markdown) {
   std::vector<std::string> lines = splitLines(markdown);
   std::ostringstream html;
@@ -470,6 +489,7 @@ int main() {
     const fs::path contentDir = repoRoot / "content";
     const fs::path staticDir = repoRoot / "static";
     const fs::path distDir = repoRoot / "dist";
+    std::map<std::string, std::string> routeAliases = loadRouteAliases(contentDir / "route-aliases.txt");
 
     if (fs::exists(distDir)) {
       fs::remove_all(distDir);
@@ -545,6 +565,9 @@ int main() {
     }
 
     copyFile(staticDir / "styles.css", distDir / "styles.css");
+    if (!routeAliases.empty()) {
+      writeFile(distDir / "route-aliases.txt", std::to_string(routeAliases.size()));
+    }
     return 0;
   } catch (const std::exception &error) {
     std::cerr << error.what() << std::endl;
