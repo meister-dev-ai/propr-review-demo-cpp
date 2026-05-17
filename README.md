@@ -24,3 +24,7 @@ The generated site includes these routes:
 - `/blog/`
 - `/blog/welcome-to-the-demo/`
 - `/blog/reviewing-pull-requests-effectively/`
+
+## Review branches
+
+- `BUG_SCENARIOS.md` lists the intentionally defective feature branches that should be reviewed against `main`.
