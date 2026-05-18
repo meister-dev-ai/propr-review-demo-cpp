@@ -23,6 +23,7 @@ struct Document {
   std::string route;
   std::string title;
   std::string description;
+  std::string cardSnippet;
   std::string summary;
   std::string date;
   int order = 0;
@@ -279,6 +280,7 @@ Document parseDocument(const fs::path &path, const std::string &route, const std
   document.route = route;
   document.title = frontmatter.fields.at("title");
   document.description = frontmatter.fields.count("description") ? frontmatter.fields.at("description") : "";
+  document.cardSnippet = frontmatter.fields.count("card_snippet") ? frontmatter.fields.at("card_snippet") : "";
   document.summary = frontmatter.fields.count("summary") ? frontmatter.fields.at("summary") : "";
   document.date = frontmatter.fields.count("date") ? frontmatter.fields.at("date") : "";
   document.order = parseOrder(frontmatter.fields);
@@ -414,6 +416,10 @@ std::string renderSectionContent(const Section &section) {
       html << "      <p>" << escapeHtml(article.summary) << "</p>\n";
     } else if (!article.description.empty()) {
       html << "      <p>" << escapeHtml(article.description) << "</p>\n";
+    }
+
+    if (!article.cardSnippet.empty()) {
+      html << "      <div class=\"article-card-snippet\">" << article.cardSnippet << "</div>\n";
     }
 
     html << "    </article>\n";
