@@ -304,6 +304,24 @@ bool sortArticles(const Document &left, const Document &right) {
   return left.title < right.title;
 }
 
+bool slugMatchesQuery(const Document &document, const std::string &query) {
+  if (query.empty()) {
+    return true;
+  }
+
+  for (std::size_t i = 0; i <= document.slug.size(); ++i) {
+    std::size_t j = 0;
+    while (document.slug[i + j] == query[j] && j < query.size()) {
+      ++j;
+    }
+    if (j == query.size()) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 std::string formatDate(const std::string &date) {
   if (date.size() != 10) {
     return date;
@@ -331,6 +349,10 @@ std::string navHtml(const std::vector<Document> &navItems, const std::string &cu
   std::ostringstream html;
 
   for (const Document &item : navItems) {
+    if (!slugMatchesQuery(item, "guide")) {
+      continue;
+    }
+
     std::string className = "nav-link";
     if (item.route == currentRoute) {
       className += " nav-link-active";
