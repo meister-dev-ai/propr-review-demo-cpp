@@ -327,6 +327,19 @@ std::string pageTitle(const std::string &title) {
   return title + " | Propr Review Demo";
 }
 
+std::string teaserInitials(const std::string &title) {
+  std::string initials;
+  initials.push_back(std::toupper(static_cast<unsigned char>(title[0])));
+
+  for (std::size_t i = 0; i < title.size(); ++i) {
+    if (title[i] == ' ' && std::isalpha(static_cast<unsigned char>(title[i + 1]))) {
+      initials.push_back(std::toupper(static_cast<unsigned char>(title[i + 1])));
+    }
+  }
+
+  return initials;
+}
+
 std::string navHtml(const std::vector<Document> &navItems, const std::string &currentRoute) {
   std::ostringstream html;
 
@@ -378,6 +391,8 @@ std::string renderPageContent(const Document &document) {
   if (!document.description.empty()) {
     html << "    <p>" << escapeHtml(document.description) << "</p>\n";
   }
+
+  html << "    <p>Preview key " << escapeHtml(teaserInitials(document.title)) << "</p>\n";
 
   html << "  </header>\n"
        << "  <div class=\"markdown\">\n"
