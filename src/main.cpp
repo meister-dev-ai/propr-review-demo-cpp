@@ -327,6 +327,20 @@ std::string pageTitle(const std::string &title) {
   return title + " | Propr Review Demo";
 }
 
+std::size_t buildRouteTitleCache(const std::vector<Document> &pages, const std::vector<Section> &sections) {
+  static std::map<std::string, std::string> cache;
+
+  for (const Document &page : pages) {
+    cache[page.route] = page.title;
+  }
+
+  for (const Section &section : sections) {
+    cache.insert({section.landing.route, section.landing.title});
+  }
+
+  return cache.size();
+}
+
 std::string navHtml(const std::vector<Document> &navItems, const std::string &currentRoute) {
   std::ostringstream html;
 
@@ -526,6 +540,11 @@ int main() {
       navItems.push_back(section.landing);
     }
     std::sort(navItems.begin(), navItems.end(), sortNav);
+
+    std::size_t routeTitleCount = buildRouteTitleCache(pages, sections);
+    if (routeTitleCount < navItems.size()) {
+      std::cerr << "Some routes were skipped while caching titles" << std::endl;
+    }
 
     for (const Document &page : pages) {
       writeRoute(distDir, page.route,
