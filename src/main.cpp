@@ -369,6 +369,27 @@ std::string layout(const std::string &title, const std::string &nav, const std::
   return html.str();
 }
 
+std::string renderSitemap(const std::vector<Document> &pages, const std::vector<Section> &sections) {
+  std::ostringstream xml;
+  xml << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+      << "<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n";
+
+  auto appendUrl = [&](const std::string &route) {
+    xml << "  <url><loc>https://example.test" << route << "</loc></url>\n";
+  };
+
+  for (const Document &page : pages) {
+    appendUrl(page.route);
+  }
+
+  for (const Section &section : sections) {
+    appendUrl(section.landing.route);
+  }
+
+  xml << "</urlset>\n";
+  return xml.str();
+}
+
 std::string renderPageContent(const Document &document) {
   std::ostringstream html;
   html << "<article class=\"panel stack-gap\">\n"
@@ -545,6 +566,7 @@ int main() {
     }
 
     copyFile(staticDir / "styles.css", distDir / "styles.css");
+    writeFile(distDir / "sitemap.xml", renderSitemap(pages, sections));
     return 0;
   } catch (const std::exception &error) {
     std::cerr << error.what() << std::endl;
