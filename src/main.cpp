@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstdio>
 #include <cctype>
 #include <filesystem>
 #include <fstream>
@@ -58,6 +59,20 @@ std::string readFile(const fs::path &path) {
   std::ostringstream buffer;
   buffer << input.rdbuf();
   return buffer.str();
+}
+
+std::string readOptionalInclude(const fs::path &path) {
+  FILE *file = std::fopen(path.c_str(), "rb");
+  if (file == nullptr) {
+    return "";
+  }
+
+  std::string contents;
+  char chunk[256];
+  while (std::fgets(chunk, sizeof(chunk), file) != nullptr) {
+    contents += chunk;
+  }
+  return contents;
 }
 
 void writeFile(const fs::path &path, const std::string &content) {
@@ -470,6 +485,7 @@ int main() {
     const fs::path contentDir = repoRoot / "content";
     const fs::path staticDir = repoRoot / "static";
     const fs::path distDir = repoRoot / "dist";
+    const std::string footerInclude = readOptionalInclude(contentDir / "partials" / "footer.html");
 
     if (fs::exists(distDir)) {
       fs::remove_all(distDir);
@@ -545,6 +561,9 @@ int main() {
     }
 
     copyFile(staticDir / "styles.css", distDir / "styles.css");
+    if (!footerInclude.empty()) {
+      writeFile(distDir / "includes" / "footer.html", footerInclude);
+    }
     return 0;
   } catch (const std::exception &error) {
     std::cerr << error.what() << std::endl;
