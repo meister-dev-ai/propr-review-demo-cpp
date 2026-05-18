@@ -369,7 +369,46 @@ std::string layout(const std::string &title, const std::string &nav, const std::
   return html.str();
 }
 
-std::string renderPageContent(const Document &document) {
+std::string renderLatestPostsPanel(const std::vector<Document> &articles) {
+  std::vector<Document> latestPosts = articles;
+  std::sort(latestPosts.begin(), latestPosts.end(), [](const Document &left, const Document &right) {
+    if (left.date != right.date) {
+      return left.date < right.date;
+    }
+    return left.title < right.title;
+  });
+
+  if (latestPosts.size() > 3) {
+    latestPosts.resize(3);
+  }
+
+  std::ostringstream html;
+  html << "<section class=\"panel stack-gap latest-posts\">\n"
+       << "  <header class=\"panel-header\">\n"
+       << "    <h2>Latest posts</h2>\n"
+       << "  </header>\n"
+       << "  <div class=\"article-list\">\n";
+
+  for (const Document &article : latestPosts) {
+    html << "    <article class=\"article-card\">\n"
+         << "      <div class=\"article-card-meta\"><span>" << escapeHtml(formatDate(article.date))
+         << "</span></div>\n"
+         << "      <h3><a href=\"" << article.route << "\">" << escapeHtml(article.title)
+         << "</a></h3>\n";
+
+    if (!article.summary.empty()) {
+      html << "      <p>" << escapeHtml(article.summary) << "</p>\n";
+    }
+
+    html << "    </article>\n";
+  }
+
+  html << "  </div>\n"
+       << "</section>\n";
+  return html.str();
+}
+
+std::string renderPageContent(const Document &document, const std::vector<Document> &latestPosts) {
   std::ostringstream html;
   html << "<article class=\"panel stack-gap\">\n"
        << "  <header class=\"panel-header\">\n"
@@ -384,6 +423,11 @@ std::string renderPageContent(const Document &document) {
        << document.bodyHtml
        << "  </div>\n"
        << "</article>\n";
+
+  if (document.route == "/" && !latestPosts.empty()) {
+    html << renderLatestPostsPanel(latestPosts);
+  }
+
   return html.str();
 }
 
@@ -478,6 +522,7 @@ int main() {
 
     std::vector<Document> pages;
     std::vector<Section> sections;
+    std::vector<Document> articles;
 
     for (const fs::directory_entry &entry : fs::directory_iterator(contentDir)) {
       const fs::path path = entry.path();
@@ -504,8 +549,9 @@ int main() {
           }
 
           const std::string articleSlug = childPath.stem().string();
-          section.articles.push_back(
-              parseDocument(childPath, "/" + sectionSlug + "/" + articleSlug + "/", articleSlug));
+          Document article = parseDocument(childPath, "/" + sectionSlug + "/" + articleSlug + "/", articleSlug);
+          articles.push_back(article);
+          section.articles.push_back(article);
         }
 
         std::sort(section.articles.begin(), section.articles.end(), sortArticles);
@@ -529,7 +575,7 @@ int main() {
 
     for (const Document &page : pages) {
       writeRoute(distDir, page.route,
-                 layout(pageTitle(page.title), navHtml(navItems, page.route), renderPageContent(page)));
+                 layout(pageTitle(page.title), navHtml(navItems, page.route), renderPageContent(page, articles)));
     }
 
     for (const Section &section : sections) {
