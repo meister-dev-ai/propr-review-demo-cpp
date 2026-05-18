@@ -404,7 +404,8 @@ std::string renderSectionContent(const Section &section) {
        << "  <div class=\"article-list\">\n";
 
   for (const Document &article : section.articles) {
-    html << "    <article class=\"article-card\">\n"
+    html << "    <a class=\"article-card-link\" href=\"" << article.route << "\">\n"
+         << "    <article class=\"article-card\">\n"
          << "      <div class=\"article-card-meta\"><span>" << escapeHtml(formatDate(article.date))
          << "</span></div>\n"
          << "      <h2><a href=\"" << article.route << "\">" << escapeHtml(article.title)
@@ -416,7 +417,8 @@ std::string renderSectionContent(const Section &section) {
       html << "      <p>" << escapeHtml(article.description) << "</p>\n";
     }
 
-    html << "    </article>\n";
+    html << "    </article>\n"
+         << "    </a>\n";
   }
 
   html << "  </div>\n"
