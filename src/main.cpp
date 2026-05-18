@@ -22,6 +22,7 @@ struct Document {
   std::string slug;
   std::string route;
   std::string title;
+  std::string highlightLabel;
   std::string description;
   std::string summary;
   std::string date;
@@ -278,6 +279,7 @@ Document parseDocument(const fs::path &path, const std::string &route, const std
   document.slug = slug;
   document.route = route;
   document.title = frontmatter.fields.at("title");
+  document.highlightLabel = frontmatter.fields.count("highlight_label") ? frontmatter.fields.at("highlight_label") : "";
   document.description = frontmatter.fields.count("description") ? frontmatter.fields.at("description") : "";
   document.summary = frontmatter.fields.count("summary") ? frontmatter.fields.at("summary") : "";
   document.date = frontmatter.fields.count("date") ? frontmatter.fields.at("date") : "";
@@ -374,6 +376,10 @@ std::string renderPageContent(const Document &document) {
   html << "<article class=\"panel stack-gap\">\n"
        << "  <header class=\"panel-header\">\n"
        << "    <h1>" << escapeHtml(document.title) << "</h1>\n";
+
+  if (!document.highlightLabel.empty()) {
+    html << "    <p class=\"page-highlight\">" << document.highlightLabel << "</p>\n";
+  }
 
   if (!document.description.empty()) {
     html << "    <p>" << escapeHtml(document.description) << "</p>\n";
