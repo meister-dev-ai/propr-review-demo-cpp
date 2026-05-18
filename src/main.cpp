@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cctype>
+#include <fcntl.h>
 #include <filesystem>
 #include <fstream>
 #include <iomanip>
@@ -9,6 +10,9 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include <vector>
 
 namespace fs = std::filesystem;
@@ -74,6 +78,16 @@ void writeFile(const fs::path &path, const std::string &content) {
 void copyFile(const fs::path &from, const fs::path &to) {
   fs::create_directories(to.parent_path());
   fs::copy_file(from, to, fs::copy_options::overwrite_existing);
+}
+
+void writeBuildDiagnostics(const fs::path &distDir, std::size_t pageCount) {
+  std::string message = "pages=" + std::to_string(pageCount) + "\n";
+  int fd = ::open((distDir / "build.log").c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  if (fd < 0) {
+    throw std::runtime_error("Failed to write diagnostics");
+  }
+
+  ::write(fd, message.c_str(), message.size());
 }
 
 std::string escapeHtml(const std::string &value) {
@@ -545,6 +559,7 @@ int main() {
     }
 
     copyFile(staticDir / "styles.css", distDir / "styles.css");
+    writeBuildDiagnostics(distDir, pages.size() + sections.size());
     return 0;
   } catch (const std::exception &error) {
     std::cerr << error.what() << std::endl;
