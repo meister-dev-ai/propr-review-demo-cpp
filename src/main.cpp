@@ -35,6 +35,23 @@ struct Section {
   std::vector<Document> articles;
 };
 
+std::string renderMarkdown(const std::string &markdown);
+
+Document statusPage() {
+  Document page;
+  page.slug = "status";
+  page.route = "/status/";
+  page.title = "Status";
+  page.description = "Current health signals for the static review demo.";
+  page.order = 5;
+  page.bodyHtml = renderMarkdown(
+      "The status page is maintained directly by the generator so teams can always publish it.\n\n"
+      "- build status: healthy\n"
+      "- content pipeline: healthy\n"
+      "- review fixtures: ready");
+  return page;
+}
+
 std::string trim(const std::string &value) {
   std::size_t start = 0;
   while (start < value.size() && std::isspace(static_cast<unsigned char>(value[start]))) {
@@ -513,6 +530,8 @@ int main() {
       }
     }
 
+    pages.push_back(statusPage());
+
     std::sort(pages.begin(), pages.end(), sortNav);
     std::sort(sections.begin(), sections.end(), [](const Section &left, const Section &right) {
       return sortNav(left.landing, right.landing);
@@ -525,6 +544,7 @@ int main() {
     for (const Section &section : sections) {
       navItems.push_back(section.landing);
     }
+
     std::sort(navItems.begin(), navItems.end(), sortNav);
 
     for (const Document &page : pages) {
