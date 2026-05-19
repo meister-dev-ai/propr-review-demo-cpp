@@ -25,6 +25,11 @@ The generated site includes these routes:
 - `/blog/welcome-to-the-demo/`
 - `/blog/reviewing-pull-requests-effectively/`
 
+## Content model
+
+- Navigation, routing, and page discovery are derived from markdown content under `content/`.
+- New user-visible destinations should appear by following content conventions rather than by adding route or navigation special cases in code.
+
 ## Review branches
 
 - `BUG_SCENARIOS.md` lists the intentionally defective feature branches that should be reviewed against `main`.
