@@ -25,6 +25,11 @@ The generated site includes these routes:
 - `/blog/welcome-to-the-demo/`
 - `/blog/reviewing-pull-requests-effectively/`
 
+## Content model
+
+- First-class site pages and sections are expected to come from markdown content stored under `content/`.
+- User-facing sections should reuse the same section/article pipeline so routing, ordering, and rendering stay consistent across the site.
+
 ## Review branches
 
 - `BUG_SCENARIOS.md` lists the intentionally defective feature branches that should be reviewed against `main`.
