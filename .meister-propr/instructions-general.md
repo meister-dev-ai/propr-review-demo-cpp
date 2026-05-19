@@ -31,6 +31,7 @@ Avoid low-value comments about minor wording, formatting, or subjective style un
 - `content/<name>.md` maps to `/<name>/`.
 - `content/<section>/_index.md` defines a top-level section at `/<section>/`.
 - additional markdown files in `content/<section>/` become article pages at `/<section>/<article>/`.
+- navigation, routing, and discovery should continue to follow these content conventions instead of using manually injected page registrations
 
 Reviewers should flag changes that break these conventions without updating the generator and app logic consistently.
 
