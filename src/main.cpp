@@ -35,6 +35,12 @@ struct Section {
   std::vector<Document> articles;
 };
 
+struct ShowcaseEntry {
+  std::string route;
+  std::string title;
+  std::string summary;
+};
+
 std::string trim(const std::string &value) {
   std::size_t start = 0;
   while (start < value.size() && std::isspace(static_cast<unsigned char>(value[start]))) {
@@ -327,6 +333,15 @@ std::string pageTitle(const std::string &title) {
   return title + " | Propr Review Demo";
 }
 
+std::vector<ShowcaseEntry> showcaseEntries() {
+  return {
+      {"/showcase/cpp-static-site/", "C++ Static Site",
+       "A lightweight site generator used to review content and routing changes."},
+      {"/showcase/review-workflows/", "Review Workflows",
+       "A compact example project for practicing pull request review habits."},
+  };
+}
+
 std::string navHtml(const std::vector<Document> &navItems, const std::string &currentRoute) {
   std::ostringstream html;
 
@@ -445,6 +460,43 @@ std::string renderArticleContent(const Section &section, const Document &article
   return html.str();
 }
 
+std::string renderShowcaseIndex(const std::vector<ShowcaseEntry> &entries) {
+  std::ostringstream html;
+  html << "<section class=\"panel stack-gap\">\n"
+       << "  <header class=\"panel-header\">\n"
+       << "    <h1>Showcase</h1>\n"
+       << "    <p>Selected examples built with the same review-first mindset as the demo site.</p>\n"
+       << "  </header>\n"
+       << "  <div class=\"article-list\">\n";
+
+  for (const ShowcaseEntry &entry : entries) {
+    html << "    <article class=\"article-card\">\n"
+         << "      <h2><a href=\"" << entry.route << "\">" << escapeHtml(entry.title)
+         << "</a></h2>\n"
+         << "      <p>" << escapeHtml(entry.summary) << "</p>\n"
+         << "    </article>\n";
+  }
+
+  html << "  </div>\n"
+       << "</section>\n";
+  return html.str();
+}
+
+std::string renderShowcaseEntry(const ShowcaseEntry &entry) {
+  std::ostringstream html;
+  html << "<article class=\"panel stack-gap\">\n"
+       << "  <a class=\"back-link\" href=\"/showcase/\">Back to Showcase</a>\n"
+       << "  <header class=\"panel-header\">\n"
+       << "    <h1>" << escapeHtml(entry.title) << "</h1>\n"
+       << "    <p>" << escapeHtml(entry.summary) << "</p>\n"
+       << "  </header>\n"
+       << "  <div class=\"markdown\">\n"
+       << "<p>This example is surfaced through the showcase catalog instead of the section/article markdown flow.</p>\n"
+       << "  </div>\n"
+       << "</article>\n";
+  return html.str();
+}
+
 void writeRoute(const fs::path &distDir, const std::string &route, const std::string &html) {
   fs::path filePath = distDir;
   if (route == "/") {
@@ -525,7 +577,17 @@ int main() {
     for (const Section &section : sections) {
       navItems.push_back(section.landing);
     }
+
+    Document showcaseNav;
+    showcaseNav.slug = "showcase";
+    showcaseNav.route = "/showcase/";
+    showcaseNav.title = "Showcase";
+    showcaseNav.order = 25;
+    navItems.push_back(showcaseNav);
+
     std::sort(navItems.begin(), navItems.end(), sortNav);
+
+    const std::vector<ShowcaseEntry> showcase = showcaseEntries();
 
     for (const Document &page : pages) {
       writeRoute(distDir, page.route,
@@ -542,6 +604,14 @@ int main() {
                    layout(pageTitle(article.title), navHtml(navItems, section.landing.route),
                           renderArticleContent(section, article)));
       }
+    }
+
+    writeRoute(distDir, "/showcase/",
+               layout(pageTitle("Showcase"), navHtml(navItems, "/showcase/"), renderShowcaseIndex(showcase)));
+
+    for (const ShowcaseEntry &entry : showcase) {
+      writeRoute(distDir, entry.route,
+                 layout(pageTitle(entry.title), navHtml(navItems, "/showcase/"), renderShowcaseEntry(entry)));
     }
 
     copyFile(staticDir / "styles.css", distDir / "styles.css");
