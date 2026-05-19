@@ -1,3 +1,8 @@
+"""
+description: C++ static-site generator review conventions covering content-driven sections, routing, navigation, ordering, and HTML rendering.
+when-to-use: When files change in src/main.cpp, content/, static/, Makefile, or generated route/navigation behavior.
+"""
+
 # ProPR Review Instructions
 
 ## Project Summary
@@ -91,3 +96,8 @@ Keep comments concrete and actionable. Prefer identifying:
 - maintainability risks from duplicated route or sorting logic
 
 Prefer not to comment on purely stylistic or syntactic choices unless they obscure intent or increase the chance of future mistakes.
+
+## Semantic Benchmark Guidance
+
+- Navigation, routing, and page discovery should stay convention-derived from content structure rather than being manually injected per feature.
+- Even when a PR adds a status-style destination, flag special-cased route or navigation registration in code instead of convention-based discovery.
