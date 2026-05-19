@@ -41,6 +41,7 @@ The current generator behavior is intentional:
 - pages and sections are ordered by `order`, then `title`
 - articles are ordered by `date` descending, then `order`, then `title`
 - navigation is derived from content files and section landing pages, not maintained separately
+- user-facing sections should share the existing section/article pipeline instead of introducing parallel bespoke rendering paths
 
 Flag PRs that accidentally change these ordering rules or introduce duplicated sources of truth.
 
