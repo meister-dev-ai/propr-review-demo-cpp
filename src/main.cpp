@@ -35,6 +35,49 @@ struct Section {
   std::vector<Document> articles;
 };
 
+std::string renderMarkdown(const std::string &markdown);
+bool sortArticles(const Document &left, const Document &right);
+
+Section handbookSection() {
+  Section section;
+
+  section.landing.slug = "handbook";
+  section.landing.route = "/handbook/";
+  section.landing.title = "Handbook";
+  section.landing.description = "Internal practices and operating notes for the Propr Review Demo.";
+  section.landing.order = 30;
+  section.landing.bodyHtml = renderMarkdown(
+      "The handbook collects operating notes for the demo site.\n\n"
+      "- onboarding checklist\n"
+      "- review playbook\n"
+      "- release notes");
+
+  Document onboarding;
+  onboarding.slug = "onboarding";
+  onboarding.route = "/handbook/onboarding/";
+  onboarding.title = "Reviewer Onboarding";
+  onboarding.description = "A quick start guide for new reviewers joining the demo project.";
+  onboarding.summary = "Start with the content model, then verify generated routes and nav.";
+  onboarding.order = 10;
+  onboarding.bodyHtml = renderMarkdown(
+      "New reviewers should begin with the content structure and verify generated output before diving into styling changes.");
+  section.articles.push_back(onboarding);
+
+  Document releases;
+  releases.slug = "release-checklist";
+  releases.route = "/handbook/release-checklist/";
+  releases.title = "Release Checklist";
+  releases.description = "A short release checklist for the generated demo site.";
+  releases.summary = "Confirm content changes, rebuild the site, and spot-check key routes.";
+  releases.order = 20;
+  releases.bodyHtml = renderMarkdown(
+      "Before a release, rebuild the site, review the generated output, and confirm the primary sections render correctly.");
+  section.articles.push_back(releases);
+
+  std::sort(section.articles.begin(), section.articles.end(), sortArticles);
+  return section;
+}
+
 std::string trim(const std::string &value) {
   std::size_t start = 0;
   while (start < value.size() && std::isspace(static_cast<unsigned char>(value[start]))) {
@@ -512,6 +555,8 @@ int main() {
         sections.push_back(section);
       }
     }
+
+    sections.push_back(handbookSection());
 
     std::sort(pages.begin(), pages.end(), sortNav);
     std::sort(sections.begin(), sections.end(), [](const Section &left, const Section &right) {
