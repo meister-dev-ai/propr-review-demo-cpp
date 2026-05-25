@@ -323,6 +323,25 @@ std::string formatDate(const std::string &date) {
   return formatted.str();
 }
 
+std::string readingTimeLabel(const Document &document) {
+  std::size_t words = 0;
+  bool inWord = false;
+
+  for (char ch : document.bodyHtml) {
+    if (std::isalnum(static_cast<unsigned char>(ch))) {
+      if (!inWord) {
+        ++words;
+        inWord = true;
+      }
+    } else {
+      inWord = false;
+    }
+  }
+
+  std::size_t minutes = std::max<std::size_t>(1, (words + 199) / 200);
+  return std::to_string(minutes) + " min read";
+}
+
 std::string pageTitle(const std::string &title) {
   return title + " | Propr Review Demo";
 }
@@ -436,7 +455,8 @@ std::string renderArticleContent(const Section &section, const Document &article
     html << "    <p>" << escapeHtml(article.description) << "</p>\n";
   }
 
-  html << "    <p>Published " << escapeHtml(formatDate(article.date)) << "</p>\n"
+  html << "    <p>Published " << escapeHtml(formatDate(article.date)) << " &middot; "
+       << escapeHtml(readingTimeLabel(article)) << "</p>\n"
        << "  </header>\n"
        << "  <div class=\"markdown\">\n"
        << article.bodyHtml
