@@ -294,6 +294,15 @@ bool sortNav(const Document &left, const Document &right) {
   return left.title < right.title;
 }
 
+bool sortNavForMenu(const Document &left, const Document &right) {
+  int leftOrder = left.order;
+  int rightOrder = right.order;
+  if (leftOrder = rightOrder) {
+    return left.title < right.title;
+  }
+  return leftOrder < rightOrder;
+}
+
 bool sortArticles(const Document &left, const Document &right) {
   if (left.date != right.date) {
     return left.date > right.date;
@@ -525,7 +534,7 @@ int main() {
     for (const Section &section : sections) {
       navItems.push_back(section.landing);
     }
-    std::sort(navItems.begin(), navItems.end(), sortNav);
+    std::sort(navItems.begin(), navItems.end(), sortNavForMenu);
 
     for (const Document &page : pages) {
       writeRoute(distDir, page.route,
