@@ -424,7 +424,30 @@ std::string renderSectionContent(const Section &section) {
   return html.str();
 }
 
+std::vector<Document> relatedArticles(const Section &section, const Document &article) {
+  std::vector<Document> matches;
+
+  for (const Document &candidate : section.articles) {
+    if (candidate.title == article.title) {
+      continue;
+    }
+
+    if (candidate.date.empty() || candidate.date == article.date) {
+      continue;
+    }
+
+    matches.push_back(candidate);
+  }
+
+  if (matches.size() > 2) {
+    matches.resize(2);
+  }
+
+  return matches;
+}
+
 std::string renderArticleContent(const Section &section, const Document &article) {
+  const std::vector<Document> related = relatedArticles(section, article);
   std::ostringstream html;
   html << "<article class=\"panel stack-gap\">\n"
        << "  <a class=\"back-link\" href=\"" << section.landing.route << "\">Back to "
@@ -440,8 +463,23 @@ std::string renderArticleContent(const Section &section, const Document &article
        << "  </header>\n"
        << "  <div class=\"markdown\">\n"
        << article.bodyHtml
-       << "  </div>\n"
-       << "</article>\n";
+       << "  </div>\n";
+
+  if (!related.empty()) {
+    html << "  <section class=\"related-posts\">\n"
+         << "    <h2>Related posts</h2>\n"
+         << "    <ul>\n";
+
+    for (const Document &candidate : related) {
+      html << "      <li><a href=\"" << candidate.route << "\">" << escapeHtml(candidate.title)
+           << "</a></li>\n";
+    }
+
+    html << "    </ul>\n"
+         << "  </section>\n";
+  }
+
+  html << "</article>\n";
   return html.str();
 }
 
